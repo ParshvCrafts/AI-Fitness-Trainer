@@ -126,8 +126,8 @@ startCameraBtn.addEventListener('click', async () => {
     try {
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
-                width: { ideal: 480, max: 640 },
-                height: { ideal: 360, max: 480 },
+                width: { ideal: 640, max: 1280 },
+                height: { ideal: 480, max: 720 },
                 facingMode: 'user',
                 frameRate: { ideal: 30, max: 30 }
             },
@@ -137,9 +137,12 @@ startCameraBtn.addEventListener('click', async () => {
         calibrationVideo.srcObject = stream;
         trainingVideo.srcObject = stream;
 
-        showScreen(calibrationScreen);
-
-        startProcessing(calibrationVideo, calibrationCanvas, calibrationProcessed);
+        // Wait for video to be ready before starting processing
+        calibrationVideo.onloadedmetadata = () => {
+            console.log('Video loaded, starting processing...');
+            showScreen(calibrationScreen);
+            startProcessing(calibrationVideo, calibrationCanvas, calibrationProcessed);
+        };
     } catch (error) {
         console.error('Error accessing camera:', error);
         alert('Unable to access camera. Please ensure camera permissions are granted.');
@@ -378,9 +381,17 @@ socket.on('frame_processed', (data) => {
     // Update processed image
     const currentScreen = document.querySelector('.screen.active');
     if (currentScreen === calibrationScreen) {
-        calibrationProcessed.src = data.processed_image;
+        if (data.processed_image) {
+            calibrationProcessed.src = data.processed_image;
+        } else {
+            console.warn('No processed image received');
+        }
     } else if (currentScreen === trainingScreen) {
-        trainingProcessed.src = data.processed_image;
+        if (data.processed_image) {
+            trainingProcessed.src = data.processed_image;
+        } else {
+            console.warn('No processed image received');
+        }
     }
 
     // Update angle display
