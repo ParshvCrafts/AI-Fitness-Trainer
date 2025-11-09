@@ -16,7 +16,7 @@ logging.getLogger('absl').setLevel(logging.ERROR)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-please-change-in-production')
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 class PoseDetector:
     def __init__(self, mode=True, smooth=False, detection_confidence=0.5, track_confidence=0.5):
