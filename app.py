@@ -80,6 +80,12 @@ class PoseDetector:
             cos_angle = max(-1, min(1, cos_angle))
             angle = math.degrees(math.acos(cos_angle))
 
+            # Invert angle: 180° becomes 0°, 0° becomes 180°
+            # This makes flexed arm (small interior angle ~30°) = large value (~150°)
+            # and extended arm (large interior angle ~170°) = small value (~10°)
+            # This matches the original behavior expected by rep counting logic
+            angle = 180 - angle
+
             if draw:
                 # Black lines (like original)
                 cv2.line(img, (x1, y1), (x2, y2), (0, 0, 0), 2)
