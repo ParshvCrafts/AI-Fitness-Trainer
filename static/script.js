@@ -287,7 +287,8 @@ let isProcessing = false;
 let animationFrameId = null;
 let displayFrameId = null;
 let lastProcessedImage = null;
-let smoothingEnabled = true;
+let overlayImage = new Image(); // Pre-create image object to avoid flickering
+let overlayLoaded = false;
 
 function startProcessing(video, canvas, processedImg) {
     const ctx = canvas.getContext('2d');
@@ -308,13 +309,9 @@ function startProcessing(video, canvas, processedImg) {
             ctx.restore();
 
             // Overlay last processed annotations if available (skeleton/angles)
-            if (lastProcessedImage) {
-                // Draw processed overlay with slight transparency for smoother blending
-                ctx.globalAlpha = smoothingEnabled ? 0.85 : 1.0;
-                const img = new Image();
-                img.src = lastProcessedImage;
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                ctx.globalAlpha = 1.0;
+            // Only draw if overlay image is fully loaded (prevents flicker)
+            if (overlayLoaded && overlayImage.complete) {
+                ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
             }
         }
         displayFrameId = requestAnimationFrame(displayLoop);
@@ -362,6 +359,10 @@ function stopProcessing() {
         displayFrameId = null;
     }
     isProcessing = false;
+
+    // Reset overlay state to prevent flicker on restart
+    overlayLoaded = false;
+    lastProcessedImage = null;
 }
 
 // Socket Event Handlers
@@ -404,9 +405,16 @@ socket.on('frame_processed', (data) => {
     // Allow next frame to be processed
     isProcessing = false;
 
-    // Store the processed skeleton overlay for smooth 60 FPS rendering
-    if (data.processed_image) {
+    // Update overlay image only when new data arrives
+    // Use onload to prevent flickering from async image loading
+    if (data.processed_image && data.processed_image !== lastProcessedImage) {
         lastProcessedImage = data.processed_image;
+
+        // Update the pre-created image object
+        overlayImage.onload = () => {
+            overlayLoaded = true; // Mark as loaded to enable rendering
+        };
+        overlayImage.src = data.processed_image;
     }
 
     // Update angle display
