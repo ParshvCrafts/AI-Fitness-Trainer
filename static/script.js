@@ -286,31 +286,56 @@ recalibrateBtn.addEventListener('click', () => {
 let isProcessing = false;
 let animationFrameId = null;
 let displayFrameId = null;
+let lastProcessedImage = null;
+let smoothingEnabled = true;
 
 function startProcessing(video, canvas, processedImg) {
     const ctx = canvas.getContext('2d');
     let lastFrameTime = 0;
-    const frameInterval = 40; // Process every 40ms (~25 FPS) for optimal balance
+    const frameInterval = 100; // Process every 100ms (~10 FPS) - reduced for better performance
 
-    // Separate display loop for smooth 60fps video preview
+    // Setup canvas once
+    canvas.width = 640;
+    canvas.height = 480;
+
+    // High-performance rendering loop - runs at 60 FPS
     function displayLoop() {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            // Show raw video feed at 60fps for smoothness
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Draw raw video to canvas at 60 FPS for smooth preview
+            ctx.save();
+            ctx.scale(-1, 1); // Mirror horizontally
+            ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            // Overlay last processed annotations if available (skeleton/angles)
+            if (lastProcessedImage) {
+                // Draw processed overlay with slight transparency for smoother blending
+                ctx.globalAlpha = smoothingEnabled ? 0.85 : 1.0;
+                const img = new Image();
+                img.src = lastProcessedImage;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1.0;
+            }
         }
         displayFrameId = requestAnimationFrame(displayLoop);
     }
 
+    // Lower-frequency processing loop - runs at 10 FPS
     function processFrame(currentTime) {
         if (currentTime - lastFrameTime >= frameInterval) {
             if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing) {
                 isProcessing = true;
                 lastFrameTime = currentTime;
 
-                // Capture frame for processing
-                const imageData = canvas.toDataURL('image/jpeg', 0.65);
+                // Capture frame at lower resolution for faster processing
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 480; // Reduced resolution
+                tempCanvas.height = 360;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+
+                // Higher quality JPEG for better accuracy
+                const imageData = tempCanvas.toDataURL('image/jpeg', 0.8);
 
                 socket.emit('process_frame', {
                     image: imageData,
@@ -322,6 +347,7 @@ function startProcessing(video, canvas, processedImg) {
         animationFrameId = requestAnimationFrame(processFrame);
     }
 
+    // Start both loops independently
     displayFrameId = requestAnimationFrame(displayLoop);
     animationFrameId = requestAnimationFrame(processFrame);
 }
@@ -378,23 +404,13 @@ socket.on('frame_processed', (data) => {
     // Allow next frame to be processed
     isProcessing = false;
 
-    // Update processed image
-    const currentScreen = document.querySelector('.screen.active');
-    if (currentScreen === calibrationScreen) {
-        if (data.processed_image) {
-            calibrationProcessed.src = data.processed_image;
-        } else {
-            console.warn('No processed image received');
-        }
-    } else if (currentScreen === trainingScreen) {
-        if (data.processed_image) {
-            trainingProcessed.src = data.processed_image;
-        } else {
-            console.warn('No processed image received');
-        }
+    // Store the processed skeleton overlay for smooth 60 FPS rendering
+    if (data.processed_image) {
+        lastProcessedImage = data.processed_image;
     }
 
     // Update angle display
+    const currentScreen = document.querySelector('.screen.active');
     if (data.angle) {
         if (currentScreen === calibrationScreen) {
             currentAngleDisplay.textContent = `${data.angle}°`;

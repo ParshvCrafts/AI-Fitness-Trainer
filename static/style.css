@@ -375,19 +375,27 @@ body {
     border: 2px solid rgba(0, 212, 255, 0.2);
 }
 
-#calibration-video,
-#training-video,
-#calibration-processed,
-#training-processed {
-    width: 100%;
-    height: auto;
-    display: block;
-    transform: scaleX(-1);
-}
-
+/* Hide video elements - we'll use canvas for smooth rendering */
 #calibration-video,
 #training-video {
     display: none;
+}
+
+/* Hide processed image elements - canvas will handle everything */
+#calibration-processed,
+#training-processed {
+    display: none;
+}
+
+/* Show canvas elements with smooth rendering */
+#calibration-canvas,
+#training-canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: auto;
+    image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
 }
 
 .calibration-overlay {
