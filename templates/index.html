@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fitness Trainer - Bicep Curl Counter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Home Button -->
+        <header class="header">
+            <button id="home-btn" class="home-btn" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Home
+            </button>
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="18" fill="none" stroke="#00d4ff" stroke-width="2"/>
+                    <path d="M15 20 L18 17 L22 21 L25 18" stroke="#00d4ff" stroke-width="2" fill="none"/>
+                    <circle cx="15" cy="20" r="2" fill="#00d4ff"/>
+                    <circle cx="25" cy="18" r="2" fill="#00d4ff"/>
+                </svg>
+                <h1>AI Fitness Trainer</h1>
+            </div>
+            <div class="tagline">Real-time Bicep Curl Analysis</div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Landing Screen -->
+            <div id="landing-screen" class="screen active">
+                <div class="hero-section">
+                    <h2 class="hero-title">AI-Powered Bicep Curl Counter</h2>
+                    <p class="hero-subtitle">Track your workouts with intelligent computer vision powered by machine learning</p>
+                    <button id="get-started-btn" class="primary-btn large-btn">
+                        Get Started
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="features-section">
+                    <h3 class="section-title">About This Project</h3>
+                    <p class="section-description">This AI Fitness Trainer uses advanced computer vision and pose estimation to provide real-time feedback on your bicep curl form and count your reps automatically.</p>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🤖</div>
+                            <h4>Machine Learning</h4>
+                            <p>MediaPipe Pose estimation analyzes your body posture in real-time to track arm movements accurately.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <h4>Real-Time Processing</h4>
+                            <p>Get instant feedback with 60 FPS display and 25 FPS pose detection for smooth, responsive tracking.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎯</div>
+                            <h4>Personalized Calibration</h4>
+                            <p>Custom calibration adapts to your unique range of motion for accurate rep counting.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h4>Live Analytics</h4>
+                            <p>Track angle, progress percentage, and rep count with beautiful visualizations.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="developer-section">
+                    <div class="developer-card">
+                        <div class="developer-avatar">PP</div>
+                        <div class="developer-info">
+                            <h4>Developed by Parshv Patel</h4>
+                            <p class="developer-title">Data Science & Machine Learning Student</p>
+                            <p class="developer-university">University of California, Berkeley</p>
+                            <p class="developer-bio">Passionate about artificial intelligence and building intelligent systems that solve real-world problems. This project demonstrates end-to-end machine learning implementation from computer vision to web deployment.</p>
+                            <a href="https://www.linkedin.com/in/parshv-patel-65a90326b/" target="_blank" class="linkedin-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                </svg>
+                                LinkedIn Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-stack-section">
+                    <h3 class="section-title">Technical Implementation</h3>
+                    <p class="section-description">Built with modern technologies and best practices</p>
+                    <div class="tech-grid">
+                        <div class="tech-badge">Python</div>
+                        <div class="tech-badge">Flask</div>
+                        <div class="tech-badge">MediaPipe</div>
+                        <div class="tech-badge">OpenCV</div>
+                        <div class="tech-badge">WebSockets</div>
+                        <div class="tech-badge">JavaScript</div>
+                        <div class="tech-badge">HTML5/CSS3</div>
+                        <div class="tech-badge">Computer Vision</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setup Screen -->
+            <div id="setup-screen" class="screen">
+                <div class="setup-card">
+                    <h2 class="setup-title">Get Ready to Train!</h2>
+                    <p class="setup-description">Let's set up your workout session</p>
+
+                    <div class="setup-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Choose Your Arm</h3>
+                            <div class="arm-selector">
+                                <button class="arm-btn active" data-arm="left">
+                                    <svg width="60" height="60" viewBox="0 0 60 60">
+                                        <circle cx="30" cy="15" r="8" fill="currentColor"/>
+                                        <rect x="25" y="23" width="10" height="15" fill="currentColor"/>
+                                        <path d="M15 30 Q10 35 15 40" stroke="currentColor" stroke-width="8" fill="none" stroke-linecap="round"/>
+                                    </svg>
+                                    <span>Left Arm</span>
+                                </button>
+                                <button class="arm-btn" data-arm="right">
+                                    <svg width="60" height="60" viewBox="0 0 60 60">
+                                        <circle cx="30" cy="15" r="8" fill="currentColor"/>
+                                        <rect x="25" y="23" width="10" height="15" fill="currentColor"/>
+                                        <path d="M45 30 Q50 35 45 40" stroke="currentColor" stroke-width="8" fill="none" stroke-linecap="round"/>
+                                    </svg>
+                                    <span>Right Arm</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setup-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Camera Access</h3>
+                            <button id="start-camera-btn" class="primary-btn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 7l-7 5 7 5V7z"/>
+                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                                </svg>
+                                Enable Camera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calibration Screen -->
+            <div id="calibration-screen" class="screen">
+                <div class="calibration-container">
+                    <div class="video-section">
+                        <div class="video-wrapper">
+                            <video id="calibration-video" autoplay playsinline></video>
+                            <canvas id="calibration-canvas" style="display:none;"></canvas>
+                            <img id="calibration-processed" alt="Processed Feed" />
+                            <div class="calibration-overlay">
+                                <div id="calibration-instruction" class="instruction-text"></div>
+                                <div id="calibration-timer" class="timer-text"></div>
+                                <div id="current-angle-display" class="angle-display"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calibration-controls">
+                        <h2>Calibration</h2>
+                        <p class="calibration-info">We need to calibrate your range of motion for accurate rep counting.</p>
+
+                        <div class="calibration-steps">
+                            <div class="calibration-step" id="step-min">
+                                <div class="step-icon">💪</div>
+                                <div class="step-info">
+                                    <h3>Step 1: Minimum Angle</h3>
+                                    <p>Contract your arm fully (bicep curl up position)</p>
+                                    <button id="calibrate-min-btn" class="calibrate-btn">Start MIN Calibration</button>
+                                    <div class="calibration-status" id="min-status"></div>
+                                </div>
+                            </div>
+
+                            <div class="calibration-step" id="step-max">
+                                <div class="step-icon">💪</div>
+                                <div class="step-info">
+                                    <h3>Step 2: Maximum Angle</h3>
+                                    <p>Extend your arm fully (down position)</p>
+                                    <button id="calibrate-max-btn" class="calibrate-btn" disabled>Start MAX Calibration</button>
+                                    <div class="calibration-status" id="max-status"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="complete-calibration-btn" class="primary-btn" disabled>
+                            Start Training
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Screen -->
+            <div id="training-screen" class="screen">
+                <div class="training-container">
+                    <div class="video-section">
+                        <div class="video-wrapper">
+                            <video id="training-video" autoplay playsinline></video>
+                            <canvas id="training-canvas" style="display:none;"></canvas>
+                            <img id="training-processed" alt="Processed Feed" />
+
+                            <!-- Rep Counter Overlay -->
+                            <div class="rep-counter-overlay">
+                                <div class="rep-count">
+                                    <div class="rep-label">REPS</div>
+                                    <div class="rep-number" id="rep-count">0</div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar Overlay -->
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" id="progress-fill"></div>
+                                </div>
+                                <div class="progress-percentage" id="progress-percentage">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-panel">
+                        <h2>Training Stats</h2>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Current Angle</div>
+                                <div class="stat-value" id="current-angle">0°</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Range</div>
+                                <div class="stat-value" id="angle-range">--</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">💪</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Tracking</div>
+                                <div class="stat-value" id="tracking-arm">Left Arm</div>
+                            </div>
+                        </div>
+
+                        <div class="controls">
+                            <button id="reset-btn" class="secondary-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                </svg>
+                                Reset Counter
+                            </button>
+                            <button id="recalibrate-btn" class="secondary-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M12 1v6m0 6v6M1 12h6m6 0h6"/>
+                                </svg>
+                                Recalibrate
+                            </button>
+                        </div>
+
+                        <div class="tips-section">
+                            <h3>Training Tips</h3>
+                            <ul class="tips-list">
+                                <li>Keep your elbow stable</li>
+                                <li>Control the movement</li>
+                                <li>Full range of motion</li>
+                                <li>Stay in frame</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2024 AI Fitness Trainer | Developed by Parshv Patel</p>
+            <p class="footer-subtitle">Data Science & Machine Learning Student</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
