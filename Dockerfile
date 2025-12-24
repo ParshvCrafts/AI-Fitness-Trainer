@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libgl1 \
     ffmpeg \
-    libsm6 \
-    libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
