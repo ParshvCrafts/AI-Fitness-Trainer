@@ -109,6 +109,10 @@ session_lock = Lock()
 def index():
     return render_template('index.html')
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204  # No content response for favicon
+
 @socketio.on('connect')
 def handle_connect():
     print(f"Client connected: {request.sid}")

@@ -58,7 +58,7 @@ Replace `YOUR_USERNAME` with your GitHub username!
    - **Instance Type**: Free
 5. Add Environment Variable:
    - **Key**: `SECRET_KEY`
-   - **Value**: Generate at https://randomkeygen.com/
+   - **Value**: ;DpREZw80Eym3d6
 6. Click "Create Web Service"
 
 ### Step 3: Wait for Build (5 minutes)
