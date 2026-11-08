@@ -45,8 +45,8 @@ A real-time AI-powered fitness application that uses computer vision to count bi
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-fitness-trainer.git
-cd ai-fitness-trainer
+git clone https://github.com/ParshvCrafts/AI-Fitness-Trainer.git
+cd AI-Fitness-Trainer
 ```
 
 2. Create virtual environment:
@@ -81,15 +81,14 @@ http://localhost:5000
 
 ## Deployment
 
-See [DEPLOYMENT_COMPLETE_GUIDE.md](DEPLOYMENT_COMPLETE_GUIDE.md) for detailed deployment instructions.
-
-### Quick Deploy to Render
+Supported target: Render (free plan) via the Blueprint in `render.yaml` (gunicorn + eventlet, Python 3.11.9,
+auto-generated `SECRET_KEY`). The previous Render service is offline (checked 2026-11-07).
 
 1. Push code to GitHub
-2. Create account on [Render](https://render.com)
-3. Create new Web Service from your GitHub repo
-4. Render will auto-detect Python and deploy
-5. Your app will be live at `https://your-app-name.onrender.com`
+2. In [Render](https://render.com) choose **New > Blueprint** and pick this repo
+3. Render reads `render.yaml` and deploys; the app is served at `https://<service-name>.onrender.com`
+
+Older deployment notes (Railway, Docker, HTTPS experiments) are in `docs/archive/` for history only.
 
 ## Project Structure
 
