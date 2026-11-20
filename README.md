@@ -90,10 +90,22 @@ auto-generated `SECRET_KEY`). The previous Render service is offline (checked 20
 
 Older deployment notes (Railway, Docker, HTTPS experiments) are in `docs/archive/` for history only.
 
+## Desktop Prototype
+
+`desktop/` holds the original OpenCV version this web app grew out of: the same elbow-angle rep counter running in a local window, with manual or automatic calibration.
+
+```bash
+cd desktop
+pip install -r requirements.txt
+python ai_trainer.py             # set USE_WEBCAM = True at the top for live camera + calibration
+```
+
+`pose_module.py` is the reusable `PoseDetector` (landmarks + `findAngle`), and `pose_estimation_basics.py` is the minimal MediaPipe Pose example. With `USE_WEBCAM = False` it runs on the bundled `videos/1.mp4`.
+
 ## Project Structure
 
 ```
-web_app/
+.
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
 ├── Procfile              # Deployment configuration
@@ -103,6 +115,7 @@ web_app/
 ├── static/
 │   ├── style.css         # Styling
 │   └── script.js         # Frontend JavaScript
+├── desktop/              # Original OpenCV desktop prototype
 └── README.md             # This file
 ```
 

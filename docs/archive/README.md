@@ -3,7 +3,7 @@
 Fix-of-the-day notes from Dec 2025 deployment attempts (Railway, Render, Docker, HTTPS, calibration fixes).
 They overlap and contradict each other. `../../README.md` is the current guide; these are kept for history only.
 Railway was abandoned: it could not build from a path with a space (`Pose Estimation/web_app`); `railway.json` was removed.
-Render Blueprint (`render.yaml`) is the supported deploy. As of 2026-11-07 the old Render URL in `website_url` returns `x-render-routing: no-server` (service deleted or suspended).
+Render Blueprint (`render.yaml`) is the supported deploy. As of 2026-11-07 the old Render URL (`https://ai-fitness-trainer-vxx7.onrender.com/`, formerly in a `website_url` file) returns `x-render-routing: no-server` (service deleted or suspended).
 
 Files:
 - CALIBRATION_INSTRUCTIONS_FIXED.md
