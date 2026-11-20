@@ -81,7 +81,7 @@ def main():
         img = detector.findPose(img)
         id_cx_cy = detector.findPosition(img, draw=True, landmark_id=20) # Tracking the 20th landmark
         cTime = time.time()
-        fps = 1 / (cTime - pTime)
+        fps = 1 / (cTime - pTime) if cTime > pTime else 0
         pTime = cTime
         cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3) # Displaying the fps on the image with scale 3, purple color and thickness 3
         cv2.imshow("Image", img) # Displaying the image
