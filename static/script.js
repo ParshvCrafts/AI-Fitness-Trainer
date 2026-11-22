@@ -14,7 +14,6 @@ const startCameraBtn = document.getElementById('start-camera-btn');
 
 const calibrationVideo = document.getElementById('calibration-video');
 const calibrationCanvas = document.getElementById('calibration-canvas');
-const calibrationProcessed = document.getElementById('calibration-processed');
 const calibrationInstruction = document.getElementById('calibration-instruction');
 const calibrationTimer = document.getElementById('calibration-timer');
 const currentAngleDisplay = document.getElementById('current-angle-display');
@@ -27,7 +26,6 @@ const maxStatus = document.getElementById('max-status');
 
 const trainingVideo = document.getElementById('training-video');
 const trainingCanvas = document.getElementById('training-canvas');
-const trainingProcessed = document.getElementById('training-processed');
 const repCount = document.getElementById('rep-count');
 const progressFill = document.getElementById('progress-fill');
 const progressPercentage = document.getElementById('progress-percentage');
@@ -141,7 +139,7 @@ startCameraBtn.addEventListener('click', async () => {
         calibrationVideo.onloadedmetadata = () => {
             console.log('Video loaded, starting processing...');
             showScreen(calibrationScreen);
-            startProcessing(calibrationVideo, calibrationCanvas, calibrationProcessed);
+            startProcessing(calibrationVideo, calibrationCanvas);
         };
     } catch (error) {
         console.error('Error accessing camera:', error);
@@ -162,7 +160,7 @@ calibrateMinBtn.addEventListener('click', () => {
     minStatus.className = 'calibration-status active';
 
     let countdown = 7;
-    calibrationInstruction.textContent = 'CONTRACT YOUR ARM (Bicep Curl Up)';
+    calibrationInstruction.textContent = 'ARM DOWN, FULLY STRAIGHT - HOLD';
     calibrationTimer.textContent = `${countdown}s`;
 
     calibrationCountdown = setInterval(() => {
@@ -204,7 +202,7 @@ calibrateMaxBtn.addEventListener('click', () => {
     maxStatus.className = 'calibration-status active';
 
     let countdown = 7;
-    calibrationInstruction.textContent = 'EXTEND YOUR ARM FULLY (Down Position)';
+    calibrationInstruction.textContent = 'CURL UP FULLY - HOLD AT THE TOP';
     calibrationTimer.textContent = `${countdown}s`;
 
     calibrationCountdown = setInterval(() => {
@@ -226,9 +224,7 @@ calibrateMaxBtn.addEventListener('click', () => {
 
                 calibrationInstruction.textContent = '';
                 calibrationTimer.textContent = '';
-
-                // Enable complete button
-                completeCalibrationBtn.disabled = false;
+                // "Start Training" is enabled by the server's calibration_done event.
             }, 100);
         }
     }, 1000);
@@ -236,9 +232,8 @@ calibrateMaxBtn.addEventListener('click', () => {
 
 // Complete Calibration
 completeCalibrationBtn.addEventListener('click', () => {
-    // Check if both angles are set (more reliable than isCalibrated flag)
-    if (!minAngle || !maxAngle || minAngle === null || maxAngle === null) {
-        alert('Please complete both MIN and MAX calibration first.');
+    if (!isCalibrated) {
+        alert('Please complete both calibration steps first.');
         return;
     }
 
@@ -249,7 +244,7 @@ completeCalibrationBtn.addEventListener('click', () => {
     trackingArm.textContent = selectedArm === 'left' ? 'Left Arm' : 'Right Arm';
     angleRange.textContent = `${minAngle}° - ${maxAngle}°`;
 
-    startProcessing(trainingVideo, trainingCanvas, trainingProcessed);
+    startProcessing(trainingVideo, trainingCanvas);
 });
 
 // Reset Counter
@@ -278,91 +273,88 @@ recalibrateBtn.addEventListener('click', () => {
 
         socket.emit('set_arm_side', { arm_side: selectedArm });
 
-        startProcessing(calibrationVideo, calibrationCanvas, calibrationProcessed);
+        startProcessing(calibrationVideo, calibrationCanvas);
     }
 });
 
 // Processing Functions
+// Two loops: the display loop paints the live camera every animation frame,
+// while the process loop sends at most one frame per FRAME_INTERVAL_MS and
+// waits for the reply before sending the next (no queue build-up on slow links).
+// The server answers with three joint positions, which are drawn over the live
+// video, so the preview never waits on the network.
+const FRAME_INTERVAL_MS = 100;
+const SEND_WIDTH = 480;
 let isProcessing = false;
 let animationFrameId = null;
 let displayFrameId = null;
-let lastProcessedImage = null;
-let overlayImage = new Image(); // Pre-create image object to avoid flickering
-let overlayLoaded = false;
+let armPoints = null; // [[x, y] x3] normalised, shoulder/elbow/wrist, from the server
+const sendCanvas = document.createElement('canvas');
 
-function startProcessing(video, canvas, processedImg) {
+function drawArm(ctx, w, h) {
+    if (!armPoints) return;
+    // The preview is mirrored, the frames sent to the server are not.
+    const pts = armPoints.map(([x, y]) => [(1 - x) * w, y * h]);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#00d4ff';
+    ctx.beginPath();
+    ctx.moveTo(...pts[0]);
+    ctx.lineTo(...pts[1]);
+    ctx.lineTo(...pts[2]);
+    ctx.stroke();
+    ctx.fillStyle = '#ff0080';
+    for (const [x, y] of pts) {
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+}
+
+function startProcessing(video, canvas) {
     const ctx = canvas.getContext('2d');
-    let lastFrameTime = 0;
-    const frameInterval = 100; // Process every 100ms (~10 FPS) - reduced for better performance
+    let lastSent = 0;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    sendCanvas.width = SEND_WIDTH;
+    sendCanvas.height = Math.round(SEND_WIDTH * canvas.height / canvas.width);
+    const sendCtx = sendCanvas.getContext('2d');
 
-    // Setup canvas once
-    canvas.width = 640;
-    canvas.height = 480;
-
-    // High-performance rendering loop - runs at 60 FPS
     function displayLoop() {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            // Draw raw video to canvas at 60 FPS for smooth preview
             ctx.save();
-            ctx.scale(-1, 1); // Mirror horizontally
+            ctx.scale(-1, 1);
             ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
             ctx.restore();
-
-            // Overlay last processed annotations if available (skeleton/angles)
-            // Only draw if overlay image is fully loaded (prevents flicker)
-            if (overlayLoaded && overlayImage.complete) {
-                ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
-            }
+            drawArm(ctx, canvas.width, canvas.height);
         }
         displayFrameId = requestAnimationFrame(displayLoop);
     }
 
-    // Lower-frequency processing loop - runs at 10 FPS
-    function processFrame(currentTime) {
-        if (currentTime - lastFrameTime >= frameInterval) {
-            if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing) {
-                isProcessing = true;
-                lastFrameTime = currentTime;
-
-                // Capture frame at lower resolution for faster processing
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = 480; // Reduced resolution
-                tempCanvas.height = 360;
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-
-                // Higher quality JPEG for better accuracy
-                const imageData = tempCanvas.toDataURL('image/jpeg', 0.8);
-
-                socket.emit('process_frame', {
-                    image: imageData,
-                    calibration_mode: calibrationMode
-                });
-            }
+    function processLoop(now) {
+        if (now - lastSent >= FRAME_INTERVAL_MS && !isProcessing &&
+            video.readyState === video.HAVE_ENOUGH_DATA) {
+            isProcessing = true;
+            lastSent = now;
+            sendCtx.drawImage(video, 0, 0, sendCanvas.width, sendCanvas.height);
+            socket.emit('process_frame', {
+                image: sendCanvas.toDataURL('image/jpeg', 0.8),
+                calibration_mode: calibrationMode
+            });
         }
-
-        animationFrameId = requestAnimationFrame(processFrame);
+        animationFrameId = requestAnimationFrame(processLoop);
     }
 
-    // Start both loops independently
     displayFrameId = requestAnimationFrame(displayLoop);
-    animationFrameId = requestAnimationFrame(processFrame);
+    animationFrameId = requestAnimationFrame(processLoop);
 }
 
 function stopProcessing() {
-    if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-    }
-    if (displayFrameId) {
-        cancelAnimationFrame(displayFrameId);
-        displayFrameId = null;
-    }
+    cancelAnimationFrame(animationFrameId);
+    cancelAnimationFrame(displayFrameId);
+    animationFrameId = null;
+    displayFrameId = null;
     isProcessing = false;
-
-    // Reset overlay state to prevent flicker on restart
-    overlayLoaded = false;
-    lastProcessedImage = null;
+    armPoints = null;
 }
 
 // Socket Event Handlers
@@ -381,7 +373,7 @@ socket.on('arm_side_set', (data) => {
 socket.on('calibration_min_complete', (data) => {
     if (data.min_angle !== undefined) {
         minAngle = data.min_angle;
-        minStatus.textContent = `✓ MIN Angle Calibrated: ${minAngle}°`;
+        minStatus.textContent = `✓ Arm down: ${minAngle}°`;
         minStatus.className = 'calibration-status success';
         console.log('MIN calibration complete:', minAngle);
     }
@@ -390,36 +382,33 @@ socket.on('calibration_min_complete', (data) => {
 socket.on('calibration_max_complete', (data) => {
     if (data.max_angle !== undefined) {
         maxAngle = data.max_angle;
-        maxStatus.textContent = `✓ MAX Angle Calibrated: ${maxAngle}°`;
+        maxStatus.textContent = `✓ Curled up: ${maxAngle}°`;
         maxStatus.className = 'calibration-status success';
-        console.log('MAX calibration complete:', maxAngle);
-
-        if (data.calibrated) {
-            isCalibrated = true;
-            console.log('Full calibration complete!', minAngle, '-', maxAngle);
-        }
     }
 });
 
+// Sent once both poses are held; the server sorts them, so step order cannot break counting.
+socket.on('calibration_done', (data) => {
+    isCalibrated = true;
+    minAngle = data.low;
+    maxAngle = data.high;
+    completeCalibrationBtn.disabled = false;
+});
+
+socket.on('calibration_error', (data) => {
+    isCalibrated = false;
+    completeCalibrationBtn.disabled = true;
+    const status = data.step === 'min' ? minStatus : maxStatus;
+    status.textContent = data.message;
+    status.className = 'calibration-status error';
+});
+
 socket.on('frame_processed', (data) => {
-    // Allow next frame to be processed
     isProcessing = false;
+    armPoints = data.points;
 
-    // Update overlay image only when new data arrives
-    // Use onload to prevent flickering from async image loading
-    if (data.processed_image && data.processed_image !== lastProcessedImage) {
-        lastProcessedImage = data.processed_image;
-
-        // Update the pre-created image object
-        overlayImage.onload = () => {
-            overlayLoaded = true; // Mark as loaded to enable rendering
-        };
-        overlayImage.src = data.processed_image;
-    }
-
-    // Update angle display
     const currentScreen = document.querySelector('.screen.active');
-    if (data.angle) {
+    if (data.angle !== null) {
         if (currentScreen === calibrationScreen) {
             currentAngleDisplay.textContent = `${data.angle}°`;
         } else if (currentScreen === trainingScreen) {
@@ -427,22 +416,13 @@ socket.on('frame_processed', (data) => {
         }
     }
 
-    // Update calibration data
-    if (data.calibrated !== undefined && data.calibrated) {
-        isCalibrated = true;
-        if (data.min_angle !== undefined) {
-            minAngle = data.min_angle;
-        }
-        if (data.max_angle !== undefined) {
-            maxAngle = data.max_angle;
-        }
-    }
-
-    // Update training data - ALWAYS update when in training screen
     if (currentScreen === trainingScreen) {
-        // Update count and percentage regardless of calibrated flag
-        if (data.count !== undefined) {
+        if (data.count !== undefined && repCount.textContent !== String(data.count)) {
             repCount.textContent = data.count;
+            // Restart the pop animation (forcing a reflow between the two assignments).
+            repCount.style.animation = 'none';
+            void repCount.offsetWidth;
+            repCount.style.animation = 'scaleIn 0.3s ease';
         }
 
         if (data.percentage !== undefined) {
@@ -458,14 +438,6 @@ socket.on('frame_processed', (data) => {
                 progressFill.style.background = 'linear-gradient(135deg, #00d4ff 0%, #0099ff 100%)';
             }
         }
-
-        // Animate rep count on change
-        if (data.count !== undefined && parseInt(repCount.textContent) !== data.count) {
-            repCount.style.animation = 'none';
-            setTimeout(() => {
-                repCount.style.animation = 'scaleIn 0.3s ease';
-            }, 10);
-        }
     }
 });
 
@@ -476,6 +448,7 @@ socket.on('counter_reset', (data) => {
 });
 
 socket.on('error', (data) => {
+    isProcessing = false; // the frame failed; let the next one go
     console.error('Server error:', data.message);
 });
 

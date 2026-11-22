@@ -46,3 +46,13 @@ Thumbs.db
 # Documentation (keep only essential)
 WELCOME.txt
 app_https_backup.py
+
+# Secrets and local env files
+.env*
+!.env.example
+*.pem
+*.key
+.pytest_cache/
+
+# Demo capture cache (downloaded clip, fake camera, frames)
+tools/.cache/

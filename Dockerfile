@@ -1,39 +1,21 @@
-# Use Python 3.10 slim image
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies required for OpenCV and MediaPipe
-RUN apt-get update && apt-get install -y \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
-    libgl1 \
-    ffmpeg \
+# Shared libraries OpenCV and MediaPipe load at import time
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libglib2.0-0 libgl1 libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to leverage Docker cache
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files
-COPY . .
+COPY app.py trainer.py ./
+COPY templates templates
+COPY static static
 
-# Create necessary directories
-RUN mkdir -p static templates
-
-# Expose port
+ENV PYTHONUNBUFFERED=1 PORT=5000
 EXPOSE 5000
 
-# Set environment variables
-ENV FLASK_APP=app.py
-ENV PYTHONUNBUFFERED=1
-ENV PORT=5000
-
-# Run the application
-CMD ["python", "app.py"]
+# One eventlet worker: per-connection state lives in this process's memory.
+CMD gunicorn --worker-class eventlet -w 1 app:app --bind 0.0.0.0:$PORT

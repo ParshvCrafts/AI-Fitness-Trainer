@@ -38,7 +38,7 @@
             <div id="landing-screen" class="screen active">
                 <div class="hero-section">
                     <h2 class="hero-title">AI-Powered Bicep Curl Counter</h2>
-                    <p class="hero-subtitle">Track your workouts with intelligent computer vision powered by machine learning</p>
+                    <p class="hero-subtitle">Counts your curls from the webcam using a pretrained pose-estimation model</p>
                     <button id="get-started-btn" class="primary-btn large-btn">
                         Get Started
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -50,7 +50,7 @@
 
                 <div class="features-section">
                     <h3 class="section-title">About This Project</h3>
-                    <p class="section-description">This AI Fitness Trainer uses advanced computer vision and pose estimation to provide real-time feedback on your bicep curl form and count your reps automatically.</p>
+                    <p class="section-description">This AI Fitness Trainer uses pose estimation to track your elbow angle and count your bicep curls automatically.</p>
 
                     <div class="features-grid">
                         <div class="feature-card">
@@ -61,7 +61,7 @@
                         <div class="feature-card">
                             <div class="feature-icon">⚡</div>
                             <h4>Real-Time Processing</h4>
-                            <p>Get instant feedback with 60 FPS display and 25 FPS pose detection for smooth, responsive tracking.</p>
+                            <p>The camera preview runs at full frame rate in the browser; pose detection runs on about 10 frames per second.</p>
                         </div>
                         <div class="feature-card">
                             <div class="feature-icon">🎯</div>
@@ -83,7 +83,7 @@
                             <h4>Developed by Parshv Patel</h4>
                             <p class="developer-title">Data Science & Machine Learning Student</p>
                             <p class="developer-university">University of California, Berkeley</p>
-                            <p class="developer-bio">Passionate about artificial intelligence and building intelligent systems that solve real-world problems. This project demonstrates end-to-end machine learning implementation from computer vision to web deployment.</p>
+                            <p class="developer-bio">Passionate about artificial intelligence and building intelligent systems that solve real-world problems. This project takes a pretrained pose model from webcam frames to a tested, deployable web app.</p>
                             <a href="https://www.linkedin.com/in/parshv-patel-65a90326b/" target="_blank" class="linkedin-btn">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
@@ -164,7 +164,6 @@
                         <div class="video-wrapper">
                             <video id="calibration-video" autoplay playsinline></video>
                             <canvas id="calibration-canvas"></canvas>
-                            <img id="calibration-processed" alt="Processed Feed" />
                             <div class="calibration-overlay">
                                 <div id="calibration-instruction" class="instruction-text"></div>
                                 <div id="calibration-timer" class="timer-text"></div>
@@ -181,9 +180,9 @@
                             <div class="calibration-step" id="step-min">
                                 <div class="step-icon">💪</div>
                                 <div class="step-info">
-                                    <h3>Step 1: Minimum Angle</h3>
-                                    <p>Contract your arm fully (bicep curl up position)</p>
-                                    <button id="calibrate-min-btn" class="calibrate-btn">Start MIN Calibration</button>
+                                    <h3>Step 1: Arm Down</h3>
+                                    <p>Let the arm hang fully straight and hold for 7 seconds</p>
+                                    <button id="calibrate-min-btn" class="calibrate-btn">Calibrate Arm Down</button>
                                     <div class="calibration-status" id="min-status"></div>
                                 </div>
                             </div>
@@ -191,9 +190,9 @@
                             <div class="calibration-step" id="step-max">
                                 <div class="step-icon">💪</div>
                                 <div class="step-info">
-                                    <h3>Step 2: Maximum Angle</h3>
-                                    <p>Extend your arm fully (down position)</p>
-                                    <button id="calibrate-max-btn" class="calibrate-btn" disabled>Start MAX Calibration</button>
+                                    <h3>Step 2: Curled Up</h3>
+                                    <p>Curl all the way up and hold at the top for 7 seconds</p>
+                                    <button id="calibrate-max-btn" class="calibrate-btn" disabled>Calibrate Curl Up</button>
                                     <div class="calibration-status" id="max-status"></div>
                                 </div>
                             </div>
@@ -213,7 +212,6 @@
                         <div class="video-wrapper">
                             <video id="training-video" autoplay playsinline></video>
                             <canvas id="training-canvas"></canvas>
-                            <img id="training-processed" alt="Processed Feed" />
 
                             <!-- Rep Counter Overlay -->
                             <div class="rep-counter-overlay">
@@ -284,6 +282,7 @@
                                 <li>Control the movement</li>
                                 <li>Full range of motion</li>
                                 <li>Stay in frame</li>
+                                <li>Face the camera, whole arm visible</li>
                             </ul>
                         </div>
                     </div>
@@ -293,7 +292,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>© 2024 AI Fitness Trainer | Developed by Parshv Patel</p>
+            <p>AI Fitness Trainer | Developed by Parshv Patel</p>
             <p class="footer-subtitle">Data Science & Machine Learning Student</p>
         </footer>
     </div>
