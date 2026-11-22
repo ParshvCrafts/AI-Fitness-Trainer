@@ -121,8 +121,8 @@ python ai_trainer.py            # set USE_WEBCAM = True at the top for a live ca
 ## Status
 
 Verified (November 2026):
-- Unit and Socket.IO end-to-end tests pass locally on Python 3.11 with MediaPipe 0.10.8. CI runs the
-  same suite on the pinned `requirements.txt` (MediaPipe 0.10.14); see the badge for its latest result.
+- All 19 tests pass locally (Windows, MediaPipe 0.10.8) and in CI on Ubuntu with the pinned
+  `requirements.txt` (MediaPipe 0.10.14). CI also builds the Docker image and gets the page from it.
 - Full browser flow (calibration → training → counting) in headless Chromium with a fake camera, as in the demo.
 
 Fixed in November 2026, each with a regression test:
